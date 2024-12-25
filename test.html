@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dice Model Test</title>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+    <style>
+        model-viewer {
+            width: 400px;
+            height: 400px;
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <model-viewer 
+        src="assets/models/dice.glb"
+        camera-controls
+        auto-rotate
+        shadow-intensity="1"
+        exposure="1"
+        shadow-softness="1"
+        environment-image="neutral"
+        alt="3D Dice Model">
+    </model-viewer>
+    <script>
+        const viewer = document.querySelector('model-viewer');
+        viewer.addEventListener('error', (error) => {
+            console.error('Error loading model:', error);
+        });
+        viewer.addEventListener('load', () => {
+            console.log('Model loaded successfully');
+        });
+    </script>
+</body>
+</html>
