@@ -215,28 +215,58 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
                       child: Column(
                         children: [
                           if (state.isSpinnerMode) ...[
-                            Text(
-                              'Max Number: ${state.maxValue}',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            Slider(
-                              value: state.maxValue.toDouble(),
-                              min: 2,
-                              max: 12,
-                              divisions: 10,
-                              onChanged: _controller.onMaxValueChanged,
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Slider(
+                                  value: state.maxValue.toDouble(),
+                                  min: 2,
+                                  max: 12,
+                                  divisions: 10,
+                                  onChanged: _controller.onMaxValueChanged,
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    state.maxValue.toString(),
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ] else ...[
-                            Text(
-                              'Number of Dice: ${state.numDice}',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            Slider(
-                              value: state.numDice.toDouble(),
-                              min: 1,
-                              max: 6,
-                              divisions: 5,
-                              onChanged: _controller.onNumDiceChanged,
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Slider(
+                                  value: state.numDice.toDouble(),
+                                  min: 1,
+                                  max: 6,
+                                  divisions: 5,
+                                  onChanged: _controller.onNumDiceChanged,
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    state.numDice.toString(),
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ],
