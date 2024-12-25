@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dice Model Test</title>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0f0f0;
+        }
+        model-viewer {
+            width: 400px;
+            height: 400px;
+            --poster-color: transparent;
+            background-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <model-viewer 
+        src="assets/models/dice.glb"
+        camera-controls
+        auto-rotate
+        camera-orbit="0deg 75deg 2.5m"
+        camera-target="0m 0m 0m"
+        field-of-view="45deg"
+        exposure="1"
+        shadow-intensity="1"
+        environment-image="neutral"
+        style="background-color: transparent;">
+    </model-viewer>
+    <script>
+        const viewer = document.querySelector('model-viewer');
+        viewer.addEventListener('load', () => {
+            console.log('Model loaded successfully');
+            // Test rotation
+            let angle = 0;
+            setInterval(() => {
+                angle = (angle + 2) % 360;
+                viewer.cameraOrbit = `${angle}deg 75deg 2.5m`;
+            }, 50);
+        });
+        viewer.addEventListener('error', (error) => {
+            console.error('Error loading model:', error);
+        });
+    </script>
+</body>
+</html>

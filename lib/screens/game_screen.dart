@@ -29,7 +29,7 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
     );
     _controller.setAnimationController(_animationController);
     
-    _confettiController = ConfettiController(duration: const Duration(seconds: 1));
+    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
     
     // Listen for spinner stops to trigger confetti
     _controller.addListener(() {
@@ -51,41 +51,108 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
     return Scaffold(
       body: Stack(
         children: [
-          // Particle background
+          // Enhanced Particle background
           CircularParticle(
             key: UniqueKey(),
-            awayRadius: 80,
-            numberOfParticles: 50,
-            speedOfParticles: 1,
+            awayRadius: 120,
+            numberOfParticles: 100,
+            speedOfParticles: 2.5,
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
             onTapAnimation: true,
             particleColor: AppTheme.primaryColor.withAlpha(150),
-            awayAnimationDuration: const Duration(milliseconds: 600),
-            maxParticleSize: 8,
+            awayAnimationDuration: const Duration(milliseconds: 400),
+            maxParticleSize: 12,
             isRandSize: true,
             isRandomColor: true,
             randColorList: AppTheme.particleColors,
             awayAnimationCurve: Curves.easeInOutBack,
             enableHover: true,
             hoverColor: AppTheme.secondaryColor,
-            hoverRadius: 90,
+            hoverRadius: 150,
+            connectDots: true,
           ),
-          // Confetti
-          Align(
-            alignment: Alignment.topCenter,
-            child: ConfettiWidget(
-              confettiController: _confettiController,
-              blastDirection: math.pi / 2,
-              maxBlastForce: 20,
-              minBlastForce: 10,
-              emissionFrequency: 0.5,
-              numberOfParticles: 20,
-              gravity: 0.3,
-              shouldLoop: false,
-              colors: SpinnerDisplay.segmentColors,
+          // Enhanced Confetti effects - bursting from center
+          ...[
+            // Upward burst
+            Center(
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirection: -math.pi / 2, // Upward
+                blastDirectionality: BlastDirectionality.explosive,
+                maxBlastForce: 60,
+                minBlastForce: 30,
+                emissionFrequency: 0.5,
+                numberOfParticles: 60,
+                gravity: 0.2,
+                shouldLoop: false,
+                colors: SpinnerDisplay.segmentColors,
+                createParticlePath: (size) {
+                  final path = Path();
+                  // Star shape
+                  for (var i = 0; i < 5; i++) {
+                    final angle = (i * 4 * math.pi) / 5;
+                    final point = Offset(
+                      size.width / 2 + math.cos(angle) * size.width / 2,
+                      size.height / 2 + math.sin(angle) * size.height / 2,
+                    );
+                    if (i == 0) {
+                      path.moveTo(point.dx, point.dy);
+                    } else {
+                      path.lineTo(point.dx, point.dy);
+                    }
+                  }
+                  path.close();
+                  return path;
+                },
+              ),
             ),
-          ),
+            // Downward burst
+            Center(
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirection: math.pi / 2, // Downward
+                blastDirectionality: BlastDirectionality.explosive,
+                maxBlastForce: 60,
+                minBlastForce: 30,
+                emissionFrequency: 0.5,
+                numberOfParticles: 60,
+                gravity: 0.2,
+                shouldLoop: false,
+                colors: SpinnerDisplay.segmentColors,
+              ),
+            ),
+            // Left diagonal burst
+            Center(
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirection: math.pi + math.pi / 6, // Left and slightly up
+                blastDirectionality: BlastDirectionality.explosive,
+                maxBlastForce: 50,
+                minBlastForce: 30,
+                emissionFrequency: 0.5,
+                numberOfParticles: 45,
+                gravity: 0.2,
+                shouldLoop: false,
+                colors: SpinnerDisplay.segmentColors,
+              ),
+            ),
+            // Right diagonal burst
+            Center(
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirection: -math.pi / 6, // Right and slightly up
+                blastDirectionality: BlastDirectionality.explosive,
+                maxBlastForce: 50,
+                minBlastForce: 30,
+                emissionFrequency: 0.5,
+                numberOfParticles: 45,
+                gravity: 0.2,
+                shouldLoop: false,
+                colors: SpinnerDisplay.segmentColors,
+              ),
+            ),
+          ],
           SafeArea(
             child: ListenableBuilder(
               listenable: _controller,
@@ -112,27 +179,31 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
                     // Main Display Area
                     Expanded(
                       child: Center(
-                        child: GestureDetector(
-                          onLongPressStart: (_) => _controller.onHoldStart(),
-                          onLongPressEnd: (_) => _controller.onHoldEnd(),
-                          onTapDown: (_) => _controller.onHoldStart(),
-                          onTapUp: (_) => _controller.onHoldEnd(),
-                          onTapCancel: _controller.onHoldEnd,
-                          behavior: HitTestBehavior.opaque,
-                          child: MouseRegion(
-                            cursor: SystemMouseCursors.click,
-                            child: state.isSpinnerMode
-                                ? SpinnerDisplay(
-                                    spinAngle: state.spinAngle,
-                                    selectedNumbers: state.selectedNumbers,
-                                    isHolding: state.isHolding,
-                                    maxValue: state.maxValue,
-                                    showResult: _controller.showResult,
-                                  )
-                                : DiceDisplay(
-                                    selectedNumbers: state.selectedNumbers,
-                                    isHolding: state.isHolding,
-                                  ),
+                        child: IgnorePointer(
+                          ignoring: _controller.isInteractionDisabled,
+                          child: GestureDetector(
+                            onLongPressStart: (_) => _controller.onHoldStart(),
+                            onLongPressEnd: (_) => _controller.onHoldEnd(),
+                            onTapDown: (_) => _controller.onHoldStart(),
+                            onTapUp: (_) => _controller.onHoldEnd(),
+                            onTapCancel: _controller.onHoldEnd,
+                            behavior: HitTestBehavior.opaque,
+                            child: MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: state.isSpinnerMode
+                                  ? SpinnerDisplay(
+                                      spinAngle: state.spinAngle,
+                                      selectedNumbers: state.selectedNumbers,
+                                      isHolding: state.isHolding,
+                                      maxValue: state.maxValue,
+                                      showResult: _controller.showResult,
+                                    )
+                                  : DiceDisplay(
+                                      selectedNumbers: state.selectedNumbers,
+                                      isHolding: state.isHolding,
+                                      showResult: _controller.showResult,
+                                    ),
+                            ),
                           ),
                         ),
                       ),

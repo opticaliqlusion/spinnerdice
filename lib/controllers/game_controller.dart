@@ -14,6 +14,7 @@ class GameController extends ChangeNotifier {
 
   GameState get state => _state;
   bool get showResult => _showResult;
+  bool get isInteractionDisabled => _isAnimating || _showResult;
 
   void setAnimationController(AnimationController controller) {
     _animationController = controller;
