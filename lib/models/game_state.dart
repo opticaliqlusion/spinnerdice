@@ -1,6 +1,8 @@
 import 'dart:math' as math;
+import 'settings_state.dart';
 
 class GameState {
+  final SettingsState settings;
   bool isSpinnerMode;
   int maxValue;
   int numDice;
@@ -11,6 +13,7 @@ class GameState {
   final math.Random random;
 
   GameState({
+    this.settings = const SettingsState(),
     this.isSpinnerMode = true,
     this.maxValue = 6,
     this.numDice = 1,
@@ -28,8 +31,10 @@ class GameState {
     double? spinAngle,
     double? spinVelocity,
     bool? isHolding,
+    SettingsState? settings,
   }) {
     return GameState(
+      settings: settings ?? this.settings,
       isSpinnerMode: isSpinnerMode ?? this.isSpinnerMode,
       maxValue: maxValue ?? this.maxValue,
       numDice: numDice ?? this.numDice,

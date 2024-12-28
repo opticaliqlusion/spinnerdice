@@ -6,6 +6,8 @@ import '../constants/theme.dart';
 import '../controllers/game_controller.dart';
 import '../widgets/spinner_display.dart';
 import '../widgets/dice_display.dart';
+import '../widgets/settings_dialog.dart';
+import '../widgets/explainer_dialog.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -33,7 +35,7 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
     
     // Listen for spinner stops to trigger confetti
     _controller.addListener(() {
-      if (_controller.showResult) {
+      if (_controller.showResult && _controller.state.settings.particleEffectsEnabled) {
         _confettiController.play();
       }
     });
@@ -51,29 +53,37 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
     return Scaffold(
       body: Stack(
         children: [
-          // Enhanced Particle background
-          CircularParticle(
-            key: UniqueKey(),
-            awayRadius: 120,
-            numberOfParticles: 100,
-            speedOfParticles: 2.5,
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            onTapAnimation: true,
-            particleColor: AppTheme.primaryColor.withAlpha(150),
-            awayAnimationDuration: const Duration(milliseconds: 400),
-            maxParticleSize: 12,
-            isRandSize: true,
-            isRandomColor: true,
-            randColorList: AppTheme.particleColors,
-            awayAnimationCurve: Curves.easeInOutBack,
-            enableHover: true,
-            hoverColor: AppTheme.secondaryColor,
-            hoverRadius: 150,
-            connectDots: true,
+          // Enhanced Particle background (only when enabled)
+          ListenableBuilder(
+            listenable: _controller,
+            builder: (context, _) {
+              if (!_controller.state.settings.particleEffectsEnabled) {
+                return const SizedBox.shrink();
+              }
+              return CircularParticle(
+                key: UniqueKey(),
+                awayRadius: 120,
+                numberOfParticles: 100,
+                speedOfParticles: 2.5,
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                onTapAnimation: true,
+                particleColor: AppTheme.primaryColor.withAlpha(150),
+                awayAnimationDuration: const Duration(milliseconds: 400),
+                maxParticleSize: 12,
+                isRandSize: true,
+                isRandomColor: true,
+                randColorList: AppTheme.particleColors,
+                awayAnimationCurve: Curves.easeInOutBack,
+                enableHover: true,
+                hoverColor: AppTheme.secondaryColor,
+                hoverRadius: 150,
+                connectDots: true,
+              );
+            },
           ),
-          // Enhanced Confetti effects - bursting from center
-          ...[
+          // Enhanced Confetti effects - bursting from center (only when enabled)
+          if (_controller.state.settings.particleEffectsEnabled) ...[
             // Upward burst
             Center(
               child: ConfettiWidget(
@@ -160,18 +170,48 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
                 final state = _controller.state;
                 return Column(
                   children: [
-                    // Mode Toggle
+                    // Top Bar with Mode Toggle and Settings
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Spinner', style: TextStyle(fontSize: 20)),
-                          Switch(
-                            value: !state.isSpinnerMode,
-                            onChanged: _controller.onModeChanged,
+                          const SizedBox(width: 48), // Balance for settings icon
+                          Row(
+                            children: [
+                              const Text('Spinner', style: TextStyle(fontSize: 20)),
+                              Switch(
+                                value: !state.isSpinnerMode,
+                                onChanged: _controller.onModeChanged,
+                              ),
+                              const Text('Dice', style: TextStyle(fontSize: 20)),
+                            ],
                           ),
-                          const Text('Dice', style: TextStyle(fontSize: 20)),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.info_outline),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => const ExplainerDialog(),
+                                  );
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.settings),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => SettingsDialog(
+                                      settings: state.settings,
+                                      onParticleEffectsChanged: _controller.onParticleEffectsChanged,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -197,6 +237,7 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
                                       isHolding: state.isHolding,
                                       maxValue: state.maxValue,
                                       showResult: _controller.showResult,
+                                      particleEffectsEnabled: state.settings.particleEffectsEnabled,
                                     )
                                   : DiceDisplay(
                                       selectedNumbers: state.selectedNumbers,

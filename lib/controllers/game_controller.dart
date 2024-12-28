@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'dart:async';
 import '../models/game_state.dart';
+import '../models/settings_state.dart';
 
 class GameController extends ChangeNotifier {
   GameState _state;
@@ -56,13 +57,14 @@ int _calculateSegmentNumber(double angle) {
       if (_state.isSpinnerMode) {
         // Only update the spin angle while spinning
         double newAngle = _state.spinAngle + _state.spinVelocity * 0.1;
-        print('Spinning - Current angle: ${newAngle.toStringAsFixed(3)} radians');
         _updateState(spinAngle: newAngle);
       } else {
+        // Use a new Random instance each time for true randomness
+        final diceRandom = math.Random();
         _updateState(
           selectedNumbers: List.generate(
             _state.numDice,
-            (_) => _state.random.nextInt(6) + 1,
+            (_) => diceRandom.nextInt(6) + 1,
           ),
         );
       }
@@ -101,8 +103,10 @@ int _calculateSegmentNumber(double angle) {
     double? spinAngle,
     double? spinVelocity,
     bool? isHolding,
+    SettingsState? settings,
   }) {
     _state = _state.copyWith(
+      settings: settings,
       isSpinnerMode: isSpinnerMode,
       maxValue: maxValue,
       numDice: numDice,
@@ -140,10 +144,14 @@ int _calculateSegmentNumber(double angle) {
   }
 
   void onHoldStart() {
+    // Random initial velocity between 10-20 for more unpredictable spins
+    final random = math.Random();
+    final initialVelocity = 10.0 + random.nextDouble() * 10.0;
+    
     _updateState(
       isHolding: true,
       selectedNumbers: [],
-      spinVelocity: 5.0,
+      spinVelocity: initialVelocity,
     );
     _isAnimating = true;
     _animationController?.repeat();
@@ -151,6 +159,14 @@ int _calculateSegmentNumber(double angle) {
 
   void onHoldEnd() {
     _updateState(isHolding: false);
+  }
+
+  void onParticleEffectsChanged(bool enabled) {
+    final newSettings = _state.settings.copyWith(
+      particleEffectsEnabled: enabled,
+    );
+    _state = _state.copyWith(settings: newSettings);
+    notifyListeners();
   }
 
   @override

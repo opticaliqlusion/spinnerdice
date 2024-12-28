@@ -248,6 +248,7 @@ class SpinnerDisplay extends StatefulWidget {
   final bool isHolding;
   final int maxValue;
   final bool showResult;
+  final bool particleEffectsEnabled;
 
   const SpinnerDisplay({
     super.key,
@@ -256,6 +257,7 @@ class SpinnerDisplay extends StatefulWidget {
     required this.isHolding,
     required this.maxValue,
     required this.showResult,
+    required this.particleEffectsEnabled,
   });
 
   static const List<Color> segmentColors = [
@@ -304,8 +306,8 @@ class _SpinnerDisplayState extends State<SpinnerDisplay> with SingleTickerProvid
           particle.update();
         }
         
-        // Add new particles
-        if (widget.showResult && widget.selectedNumbers.isNotEmpty) {
+        // Add new particles (only when enabled)
+        if (widget.showResult && widget.selectedNumbers.isNotEmpty && widget.particleEffectsEnabled) {
           final random = math.Random();
           
           // Calculate selected number position
@@ -357,10 +359,6 @@ class _SpinnerDisplayState extends State<SpinnerDisplay> with SingleTickerProvid
     });
   }
 
-  String _getEmojiForNumber(int number) {
-    final emojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
-    return number <= 10 ? emojis[number - 1] : number.toString();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -423,30 +421,12 @@ class _SpinnerDisplayState extends State<SpinnerDisplay> with SingleTickerProvid
               ),
             ),
           ),
-          // Top layer: Celebration effects
-          if (widget.showResult) ...[
+          // Top layer: Celebration effects (only when enabled)
+          if (widget.showResult && widget.particleEffectsEnabled) ...[
             CustomPaint(
               painter: ParticlePainter(_particles),
               size: const Size(400, 400),
             ),
-            // Floating emojis
-            if (widget.selectedNumbers.isNotEmpty)
-              ..._emojiKeys.map((key) {
-                // Calculate the position based on the selected number
-                final segmentAngle = 2 * math.pi / widget.maxValue;
-                final numberIndex = widget.selectedNumbers.first - 1;
-                final angle = numberIndex * segmentAngle - math.pi / 2;
-                final radius = 150.0; // Distance from center
-                final startX = 200 + radius * math.cos(angle); // Center X + offset
-                final startY = 200 + radius * math.sin(angle); // Center Y + offset
-                
-                return FloatingEmoji(
-                  key: key,
-                  emoji: _getEmojiForNumber(widget.selectedNumbers.first),
-                  startX: startX,
-                  startY: startY,
-                );
-              }),
             // Result number with celebration effect
             if (widget.selectedNumbers.isNotEmpty)
               TweenAnimationBuilder<double>(
